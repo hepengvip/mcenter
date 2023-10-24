@@ -7,4 +7,5 @@ const (
 	MSG_UNSUBSCRIBE = "UNSUB"
 	MSG_PUBLISH     = "PUB"
 	MSG_MESSAGE     = "MSG"
+	MSG_REPLY       = "REP"
 )

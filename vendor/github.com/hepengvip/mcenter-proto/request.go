@@ -22,7 +22,7 @@ func (m *Message) ToBytes() []byte {
 
 	switch m.ReqType {
 	case MSG_SET_USER:
-		return []byte(fmt.Sprintf("%s %s", prefix, m.UserId))
+		return []byte(fmt.Sprintf("%s %s\n", prefix, m.UserId))
 	case MSG_PUBLISH:
 		header := []byte(fmt.Sprintf("%s %s %d\n", prefix, m.Channel, len(*m.Payload)))
 		header = append(header, *m.Payload...)
@@ -32,7 +32,7 @@ func (m *Message) ToBytes() []byte {
 		header = append(header, *m.Payload...)
 		return header
 	default:
-		return []byte(fmt.Sprintf("%s %s", prefix, m.Channel))
+		return []byte(fmt.Sprintf("%s %s\n", prefix, m.Channel))
 	}
 }
 
@@ -42,4 +42,16 @@ func (m *Message) ReadPayload(r *bufio.Reader) error {
 		return err
 	}
 	return nil
+}
+
+func (m *Message) ToReply() (*Response, error) {
+	if m.ReqType != MSG_REPLY {
+		return nil, fmt.Errorf("cannot convert %s message to reply", m.ReqType)
+	}
+
+	return &Response{
+		ReqId:   m.ReqId,
+		ReqCode: m.PayloadSize,
+		ReqMsg:  string(*m.Payload),
+	}, nil
 }

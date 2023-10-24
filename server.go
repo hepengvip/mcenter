@@ -311,9 +311,9 @@ func (s *Server) Publish(
 	defer s.uc.RUnlock()
 
 	for _, _userId := range userIdList {
-		if _userId == userId {
-			continue
-		}
+		// if _userId == userId {
+		// 	continue
+		// }
 
 		cli, ok := s.uc.clients[_userId]
 		if !ok {
@@ -425,10 +425,6 @@ func (s *Server) handler(client *Client, reader *bufio.Reader) {
 			break
 		}
 
-		fmt.Fprintf(os.Stdout, "###################### debug ######################\n")
-		fmt.Fprintf(os.Stdout, "  Received message [%s]\n", string(*data))
-		fmt.Fprintf(os.Stdout, "###################################################\n")
-
 		msg, err := proto.Parse(*data)
 		if err != nil {
 			client.replyCh <- proto.Response{ReqCode: 100002, ReqMsg: fmt.Sprintf("Unknown command - %s", err.Error())}
@@ -496,8 +492,7 @@ func (s *Server) handler(client *Client, reader *bufio.Reader) {
 				client.replyCh <- proto.Response{ReqId: msg.ReqId, ReqCode: 100003, ReqMsg: err.Error()}
 				return
 			}
-
-			printMsg(msg)
+			msg.UserId = client.userId
 
 			err = s.Publish(msg.Channel, msg.UserId, *msg.Payload)
 			if err != nil {
@@ -521,10 +516,6 @@ func beginWriter(client *Client) {
 			data = rMsg.ToBytes()
 		}
 
-		fmt.Fprintf(os.Stdout, "###################### debug ######################\n")
-		fmt.Fprintf(os.Stdout, "  Send message [%s]\n", string(data))
-		fmt.Fprintf(os.Stdout, "###################################################\n")
-
 		var n int
 		var err error
 		if client.IsWebsocketClient() {
@@ -544,15 +535,4 @@ func beginWriter(client *Client) {
 		}
 		fmt.Fprintf(os.Stdout, "write %d bytes to client\n", n)
 	}
-}
-
-func printMsg(msg *proto.Message) {
-	fmt.Fprintf(os.Stdout, "##################### message #####################\n")
-	fmt.Fprintf(os.Stdout, "  ReqType %s\n", string(msg.ReqType))
-	fmt.Fprintf(os.Stdout, "  UserId %s\n", string(msg.UserId))
-	fmt.Fprintf(os.Stdout, "  Channel %s\n", string(msg.Channel))
-	fmt.Fprintf(os.Stdout, "  ReqId %s\n", string(msg.ReqId))
-	fmt.Fprintf(os.Stdout, "  PayloadSize %d\n", msg.PayloadSize)
-	fmt.Fprintf(os.Stdout, "  Payload %s\n", string(*msg.Payload))
-	fmt.Fprintf(os.Stdout, "###################################################\n")
 }

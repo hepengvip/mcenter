@@ -1,4 +1,4 @@
-# github.com/hepengvip/mcenter-proto v0.0.0-20231024070759-c1fc3fff63e1
+# github.com/hepengvip/mcenter-proto v0.0.7
 ## explicit
 github.com/hepengvip/mcenter-proto
 # golang.org/x/net v0.17.0
